@@ -1,199 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steganography Web Tool</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-        }
-        .container {
-            max-width: 1024px;
-            margin: auto;
-        }
-        .card {
-            background-color: #2b2b2b;
-            border: 1px solid #444;
-        }
-        .form-input, .form-textarea {
-            background-color: #3c3f41;
-            border: 1px solid #555;
-            color: #e0e0e0;
-            font-family: 'JetBrains Mono', monospace;
-        }
-        .form-input:focus, .form-textarea:focus {
-            outline: none;
-            border-color: #6897bb;
-            box-shadow: 0 0 0 2px rgba(104, 151, 187, 0.5);
-        }
-        .btn {
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            transition: all 0.2s ease-in-out;
-        }
-        .btn-primary {
-            background-color: #6a8759;
-            color: #ffffff;
-        }
-        .btn-primary:hover {
-            background-color: #7a9969;
-        }
-        .btn-secondary {
-            background-color: #6897bb;
-            color: #ffffff;
-        }
-        .btn-secondary:hover {
-            background-color: #78a7cb;
-        }
-        .alert-danger {
-            background-color: #ff6b6820;
-            color: #ffc66d;
-            border-left: 4px solid #ff6b68;
-        }
-        .alert-success {
-            background-color: #6a875920;
-            color: #a9b7c6;
-            border-left: 4px solid #6a8759;
-        }
-        .tab-button {
-            background-color: #3c3f41;
-            border: 1px solid #555;
-            border-bottom: none;
-        }
-        .tab-button.active {
-            background-color: #2b2b2b;
-            border-color: #6897bb;
-            border-bottom: 1px solid #2b2b2b;
-            color: #6897bb;
-        }
-    </style>
-</head>
-<body class="p-4 md:p-8">
+# 🕵️‍♂️ StegOSAURUS: Secure Image Steganography Tool
 
-    <div class="container px-4">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-100">Steganography <span class="text-[#6897bb]">Web</span> Tool</h1>
-            <p class="text-gray-400 mt-2">Conceal and reveal secret messages within images directly in your browser.</p>
-        </header>
+A powerful Flask-based web tool that lets you securely hide and extract secret messages in images using **AES encryption (Fernet)** and **HMAC integrity checks**. Ideal for secure communication and learning steganography with modern cryptography.
 
-        <div id="tabs" class="mb-4 flex border-b border-gray-600">
-            <button class="tab-button text-lg font-medium py-3 px-6 rounded-t-md -mb-px active" onclick="showTab('encode-tab')">Encode</button>
-            <button class="tab-button text-lg font-medium py-3 px-6 rounded-t-md -mb-px" onclick="showTab('decode-tab')">Decode</button>
-        </div>
+---
 
-        <main>
-            <!-- Encode Section -->
-            <div id="encode-tab" class="tab-content">
-                <div class="card p-6 md:p-8 rounded-lg shadow-lg">
-                    <h2 class="text-2xl font-semibold mb-6 text-[#6a8759]">Conceal a Message</h2>
-                    
-                    {% if error_encode %}
-                    <div class="alert-danger p-4 rounded-md mb-6" role="alert">
-                        <strong>Error:</strong> {{ error_encode }}
-                    </div>
-                    {% endif %}
+## 🔐 Features
 
-                    <form action="/encode" method="post" enctype="multipart/form-data">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <!-- Left Column -->
-                            <div>
-                                <div class="mb-6">
-                                    <label for="cover_image" class="block text-sm font-medium text-gray-300 mb-2">1. Upload Cover Image (PNG recommended)</label>
-                                    <input type="file" name="cover_image" id="cover_image" class="form-input w-full p-2 rounded-md" required>
-                                </div>
-                                <div class="mb-4">
-                                    <label for="password_encode" class="block text-sm font-medium text-gray-300 mb-2">3. Encryption Password (Optional, but recommended)</label>
-                                    <input type="password" name="password" id="password_encode" placeholder="Enter a strong password" class="form-input w-full p-3 rounded-md">
-                                </div>
-                            </div>
-                            <!-- Right Column -->
-                            <div>
-                                <div class="mb-6">
-                                    <label for="message" class="block text-sm font-medium text-gray-300 mb-2">2. Secret Message</label>
-                                    <textarea name="message" id="message" rows="8" placeholder="Type your secret payload here..." class="form-textarea w-full p-3 rounded-md resize-y" required></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-8 text-center">
-                            <button type="submit" class="btn btn-primary text-lg py-3 px-12 rounded-lg">
-                                Encode & Download
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
+- 🔑 **End-to-End Encryption**  
+  Uses **Fernet (AES-CBC with HMAC)** to encrypt your messages before embedding.
 
-            <!-- Decode Section -->
-            <div id="decode-tab" class="tab-content hidden">
-                 <div class="card p-6 md:p-8 rounded-lg shadow-lg">
-                    <h2 class="text-2xl font-semibold mb-6 text-[#6897bb]">Reveal a Message</h2>
-                    
-                    {% if error_decode %}
-                    <div class="alert-danger p-4 rounded-md mb-6" role="alert">
-                        <strong>Error:</strong> {{ error_decode }}
-                    </div>
-                    {% endif %}
-                    
-                    <form action="/decode" method="post" enctype="multipart/form-data">
-                        <div class="mb-6 max-w-lg mx-auto">
-                            <label for="stego_image" class="block text-sm font-medium text-gray-300 mb-2">1. Upload Stego-Image</label>
-                            <input type="file" name="stego_image" id="stego_image" class="form-input w-full p-2 rounded-md" required>
-                        </div>
-                        <div class="mb-6 max-w-lg mx-auto">
-                            <label for="password_decode" class="block text-sm font-medium text-gray-300 mb-2">2. Decryption Password (if used)</label>
-                            <input type="password" name="password" id="password_decode" placeholder="Enter the password used for encoding" class="form-input w-full p-3 rounded-md">
-                        </div>
-                        <div class="mt-8 text-center">
-                            <button type="submit" class="btn btn-secondary text-lg py-3 px-12 rounded-lg">
-                                Decode Message
-                            </button>
-                        </div>
-                    </form>
+- 🧂 **Password-Based Key Derivation**  
+  Utilizes `PBKDF2HMAC` with SHA-256 for strong key derivation from user passwords.
 
-                    {% if extracted_message %}
-                    <div class="mt-10">
-                        <h3 class="text-xl font-semibold mb-4 text-center">Extracted Message:</h3>
-                        <div class="alert-success p-4 rounded-md">
-                            <pre class="whitespace-pre-wrap break-words font-mono">{{ extracted_message }}</pre>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </main>
-    </div>
+- 🖼️ **LSB Steganography**  
+  Hides encrypted data in the **least significant bits** of the image pixels.
 
-    <script>
-        function showTab(tabId) {
-            // Hide all tab content
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden');
-            });
-            // Deactivate all tab buttons
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.classList.remove('active');
-            });
+- 🧪 **HMAC-SHA256 Verification**  
+  Ensures that extracted messages are **untampered** and valid.
 
-            // Show the selected tab content
-            document.getElementById(tabId).classList.remove('hidden');
-            // Activate the clicked tab button
-            const active_button = document.querySelector(`[onclick="showTab('${tabId}')"]`);
-            active_button.classList.add('active');
-        }
+- ⚡ Clean UI and simple web interface using Flask.
 
-        // Logic to show the correct tab based on server response
-        document.addEventListener('DOMContentLoaded', () => {
-            const initialTab = '{% if error_decode or extracted_message %}decode-tab{% else %}encode-tab{% endif %}';
-            showTab(initialTab);
-        });
-    </script>
+---
 
-</body>
-</html>
+## 📦 Dependencies
+
+Install all dependencies using:
+
+```bash
+pip install -r requirements.txt
